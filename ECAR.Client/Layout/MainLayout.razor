@@ -1,0 +1,71 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+@using MudBlazor
+
+<MudLayout>
+    <MudAppBar Elevation="3" Class="app-bar">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+        <MudSpacer />
+        <img src="images/logo-ecar.png" alt="ECAR Logo" class="app-bar-logo" />
+        <MudSpacer />
+        <MudButton Variant="Variant.Text" Color="Color.Inherit" Href="https://localhost:7296/scalar/v1" Target="_blank">
+            <MudIcon Icon="@Icons.Material.Filled.Api" Class="mr-2" />
+            API Scalar
+        </MudButton>
+    </MudAppBar>
+
+    <MudDrawer Open="@drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2" Class="sidebar">
+        <MudList T="string">
+            <MudListItem T="string" Text="Home" Icon="@Icons.Material.Filled.Home" Href="/" Class="nav-item" />
+        </MudList>
+    </MudDrawer>
+
+    <MudMainContent Class="main-content">
+        <MudContainer MaxWidth="MaxWidth.Large" Class="content">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+<style>
+.app-bar {
+    background-color: #397FDE !important;
+}
+
+.app-bar-logo {
+    max-height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+.sidebar {
+    background-color: #2A5FB8 !important;
+}
+
+.main-content {
+    background-color: #F4F5F7;
+    min-height: 100vh;
+}
+
+.content {
+    padding: 2rem;
+}
+
+.nav-item {
+    color: white !important;
+}
+
+.nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+</style>
+
+@code {
+    private bool drawerOpen = true;
+
+    private void ToggleDrawer()
+    {
+        drawerOpen = !drawerOpen;
+    }
+}
