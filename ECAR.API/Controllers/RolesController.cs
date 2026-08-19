@@ -19,9 +19,21 @@ public class RolesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<IEnumerable<RolDto>>>> GetRoles()
+    public async Task<ActionResult<ApiResponse<PagedResultDto<RolDto>>>> GetRoles([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
     {
-        var roles = await _context.Roles
+        var query = _context.Roles.AsQueryable();
+
+        // Apply search filter
+        if (!string.IsNullOrEmpty(search))
+        {
+            query = query.Where(r => r.Nombre.Contains(search));
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var roles = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(r => new RolDto
             {
                 IdRol = r.IdRol,
@@ -29,7 +41,15 @@ public class RolesController : ControllerBase
             })
             .ToListAsync();
 
-        return Ok(ApiResponse<IEnumerable<RolDto>>. SuccessResponse(roles));
+        var pagedResult = new PagedResultDto<RolDto>
+        {
+            Data = roles,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
+
+        return Ok(ApiResponse<PagedResultDto<RolDto>>.SuccessResponse(pagedResult));
     }
 
     [HttpGet("{id}")]
@@ -70,6 +90,28 @@ public class RolesController : ControllerBase
 
         return CreatedAtAction(nameof(GetRol), new { id = rol.IdRol }, 
             ApiResponse<RolDto>.SuccessResponse(rolDto, "Rol creado exitosamente"));
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ApiResponse<RolDto>>> UpdateRol(long id, UpdateRolDto updateDto)
+    {
+        var rol = await _context.Roles.FindAsync(id);
+
+        if (rol == null)
+        {
+            return NotFound(ApiResponse<RolDto>.ErrorResponse("Rol no encontrado"));
+        }
+
+        rol.Nombre = updateDto.Nombre;
+        await _context.SaveChangesAsync();
+
+        var rolDto = new RolDto
+        {
+            IdRol = rol.IdRol,
+            Nombre = rol.Nombre
+        };
+
+        return Ok(ApiResponse<RolDto>.SuccessResponse(rolDto, "Rol actualizado exitosamente"));
     }
 
     [HttpDelete("{id}")]

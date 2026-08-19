@@ -14,6 +14,8 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https:/
 
 // Register services
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<HttpClientService>();
+builder.Services.AddScoped<AuthorizationService>();
 
 // Configure MudBlazor with ECAR corporate theme
 builder.Services.AddMudServices();

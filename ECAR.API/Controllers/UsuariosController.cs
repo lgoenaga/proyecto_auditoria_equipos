@@ -20,11 +20,27 @@ public class UsuariosController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<IEnumerable<UsuarioDto>>>> GetUsuarios()
+    public async Task<ActionResult<ApiResponse<PagedResultDto<UsuarioDto>>>> GetUsuarios([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
     {
-        var usuarios = await _context.Usuarios
+        var query = _context.Usuarios
             .Include(u => u.UsuarioRoles)
             .ThenInclude(ur => ur.Rol)
+            .AsQueryable();
+
+        // Apply search filter
+        if (!string.IsNullOrEmpty(search))
+        {
+            query = query.Where(u => 
+                u.Nombre.Contains(search) || 
+                u.Correo.Contains(search) ||
+                (u.UsuarioAD != null && u.UsuarioAD.Contains(search)));
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var usuarios = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(u => new UsuarioDto
             {
                 IdUsuario = u.IdUsuario,
@@ -36,7 +52,15 @@ public class UsuariosController : ControllerBase
             })
             .ToListAsync();
 
-        return Ok(ApiResponse<IEnumerable<UsuarioDto>>.SuccessResponse(usuarios));
+        var pagedResult = new PagedResultDto<UsuarioDto>
+        {
+            Data = usuarios,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
+
+        return Ok(ApiResponse<PagedResultDto<UsuarioDto>>.SuccessResponse(pagedResult));
     }
 
     [HttpGet("{id}")]
@@ -149,6 +173,12 @@ public class UsuariosController : ControllerBase
         if (updateDto.Activo.HasValue)
             usuario.Activo = updateDto.Activo.Value;
 
+        // Update password if provided
+        if (!string.IsNullOrEmpty(updateDto.Password))
+        {
+            usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updateDto.Password);
+        }
+
         await _context.SaveChangesAsync();
 
         // Actualizar roles si se proporcionaron
@@ -174,6 +204,9 @@ public class UsuariosController : ControllerBase
             await _context.SaveChangesAsync();
         }
 
+        // Recargar usuario con roles
+        await _context.Entry(usuario).Collection(u => u.UsuarioRoles).LoadAsync();
+
         var usuarioDto = new UsuarioDto
         {
             IdUsuario = usuario.IdUsuario,
@@ -197,9 +230,10 @@ public class UsuariosController : ControllerBase
             return NotFound(ApiResponse<bool>.ErrorResponse("Usuario no encontrado"));
         }
 
-        _context.Usuarios.Remove(usuario);
+        // Soft delete - mark as inactive instead of removing
+        usuario.Activo = false;
         await _context.SaveChangesAsync();
 
-        return Ok(ApiResponse<bool>.SuccessResponse(true, "Usuario eliminado exitosamente"));
+        return Ok(ApiResponse<bool>.SuccessResponse(true, "Usuario desactivado exitosamente"));
     }
 }

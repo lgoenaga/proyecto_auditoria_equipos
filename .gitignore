@@ -1,20 +1,30 @@
-# .NET Core / .NET Framework
+# .NET build outputs
 bin/
 obj/
 out/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio
+.vs/
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
 *.userprefs
-
-# Visual Studio
-.vs/
 *.vspx
 *.sln.cache
 *.cache
 *.log
 *.ide/
+*.rsuser
 
 # Rider
 .idea/
@@ -24,23 +34,7 @@ out/
 .vscode/
 *.code-workspace
 
-# Build results
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bld/
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-[Ll]ogs/
-
-# Visual Studio cache/options directory
-.vs/
-
-# MSTest test results
+# Test results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
@@ -73,7 +67,6 @@ ScaffoldingReadMe.txt
 *.tmp
 *.tmp_proj
 *_wpftmp.csproj
-*.log
 *.tlog
 *.vspscc
 *.vssscc
@@ -108,13 +101,6 @@ ScaffoldingReadMe.txt
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-# User-specific files
-*.rsuser
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
 
 # Configuration files with sensitive data
 appsettings.Development.json

@@ -152,8 +152,8 @@
             
             if (result != null)
             {
-                // Login exitoso, redirigir a home
-                NavigationManager.NavigateTo("/");
+                // Login exitoso, redirigir a home (forceLoad para recargar el layout y reflejar roles/menú)
+                NavigationManager.NavigateTo("/", forceLoad: true);
             }
             else
             {
